@@ -14,6 +14,26 @@ in
       accentSupport = true;
     })
     // {
+      lightFlavor = lib.mkOption {
+        type = catppuccinLib.types.flavor;
+        default = config.catppuccin.home-assistant.flavor;
+        description = ''
+          Catppuccin flavor for Home Assistant light mode.
+
+          Takes priority over {option}`catppuccin.home-assistant.flavor`.
+        '';
+        example = "latte";
+      };
+      darkFlavor = lib.mkOption {
+        type = catppuccinLib.types.flavor;
+        default = config.catppuccin.home-assistant.flavor;
+        description = ''
+          Catppuccin flavor for Home Assistant dark mode.
+
+          Takes priority over {option}`catppuccin.home-assistant.flavor`.
+        '';
+        example = "macchiato";
+      };
       setDefaultAtStartup =
         (lib.mkEnableOption "setting the default theme at Home Assistant startup")
         // {
@@ -33,9 +53,9 @@ in
       frontend.themes = "!include_dir_merge_named ${sources.home-assistant}";
 
       "automation catppuccin" = lib.mkIf cfg.setDefaultAtStartup {
-        alias = "Catppuccin default theme";
+        alias = "Catppuccin default themes";
         id = "catppuccin_default_theme";
-        description = "Sets the default frontend theme to ${catppuccinLib.mkFlavorName cfg.flavor} at startup.";
+        description = "Sets the default frontend themes at startup.";
         mode = "single";
         triggers = singleton {
           trigger = "homeassistant";
@@ -55,9 +75,13 @@ in
             in
             {
               name = mkHassThemeName {
-                inherit (cfg) flavor accent;
+                inherit (cfg) accent;
+                flavor = cfg.lightFlavor;
               };
-              name_dark = "none";
+              name_dark = mkHassThemeName {
+                inherit (cfg) accent;
+                flavor = cfg.darkFlavor;
+              };
             };
         };
       };
